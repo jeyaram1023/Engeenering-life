@@ -1,0 +1,90 @@
+-- 1. Create STUDENTS table to store user profile information
+CREATE TABLE students (
+  id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT UNIQUE,
+  name TEXT,
+  mobile TEXT,
+  branch TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. Create COURSES table
+CREATE TABLE courses (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  description TEXT,
+  cover_image_url TEXT
+);
+
+-- 3. Create UNITS table for course modules
+CREATE TABLE units (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  course_id uuid REFERENCES courses(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  video_url TEXT,
+  audio_url TEXT,
+  text_content TEXT,
+  unit_order INT -- Use this to order units within a course, e.g., 1, 2, 3
+);
+
+-- 4. Create ENROLLMENTS table to link students and courses
+CREATE TABLE enrollments (
+  student_id uuid REFERENCES students(id) ON DELETE CASCADE,
+  course_id uuid REFERENCES courses(id) ON DELETE CASCADE,
+  enrolled_at TIMESTAMPTZ DEFAULT NOW(),
+  progress jsonb DEFAULT '{"completed_units": []}'::jsonb, -- Store completed unit IDs
+  PRIMARY KEY (student_id, course_id)
+);
+
+-- 5. Create FEEDBACK table
+CREATE TABLE feedback (
+    id BIGSERIAL PRIMARY KEY,
+    student_id uuid REFERENCES students(id),
+    message TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 6. Set up Row Level Security (RLS) to protect data
+
+-- Enable RLS for all relevant tables
+ALTER TABLE students ENABLE ROW LEVEL SECURITY;
+ALTER TABLE enrollments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Users can see their own profile info
+CREATE POLICY "Allow individual read access on students"
+ON students FOR SELECT
+USING (auth.uid() = id);
+
+-- Policy: Users can update their own profile info
+CREATE POLICY "Allow individual update access on students"
+ON students FOR UPDATE
+USING (auth.uid() = id);
+
+-- Policy: Users can view their own enrollments
+CREATE POLICY "Allow individual read access on enrollments"
+ON enrollments FOR SELECT
+USING (auth.uid() = student_id);
+
+-- Policy: Users can create their own enrollments
+CREATE POLICY "Allow individual insert access on enrollments"
+ON enrollments FOR INSERT
+WITH CHECK (auth.uid() = student_id);
+
+-- Policy: Anyone can view public courses and units
+-- By default, if RLS is enabled on a table, all access is denied.
+-- We need to explicitly allow read access for authenticated users.
+CREATE POLICY "Allow read access to all authenticated users on courses"
+ON courses FOR SELECT
+TO authenticated
+USING (true);
+
+CREATE POLICY "Allow read access to all authenticated users on units"
+ON units FOR SELECT
+TO authenticated
+USING (true);
+
+-- 7. Make the Storage bucket for media public
+-- NOTE: This step is done in the Supabase Dashboard UI.
+-- Go to Storage -> Create a new bucket named 'course-media' -> Make it public.
