@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Life</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+    <main>
+
+        <section id="login-page" class="page">
+            <div class="page-content">
+                <img src="https://placehold.co/100x100/purple/white?text=EL" alt="App Icon" class="app-icon-large">
+                <h1>Engineering Life</h1>
+                <p>Empowering the Engineering Journey</p>
+                <form id="login-form">
+                    <input type="email" id="email-input" placeholder="Enter your email" required>
+                    <button type="submit">Send Magic Link</button>
+                </form>
+                <div id="login-message" class="message"></div>
+            </div>
+        </section>
+
+        <section id="student-info-page" class="page hidden">
+            <div class="page-content">
+                <h2>Complete Your Profile</h2>
+                <form id="student-info-form">
+                    <input type="text" id="name-input" placeholder="Full Name" required>
+                    <input type="tel" id="mobile-input" placeholder="Mobile Number" required>
+                    <select id="branch-select" required>
+                        <option value="" disabled selected>Select Your Branch</option>
+                        <option value="CSE">CSE</option>
+                        <option value="ECE">ECE</option>
+                        <option value="AI">AI</option>
+                        <option value="AIML">AIML</option>
+                        <option value="IOT">IOT</option>
+                    </select>
+                    <button type="submit">Save & Continue</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="welcome-page" class="page hidden">
+             <div class="page-content text-center">
+                <img src="https://placehold.co/100x100/purple/white?text=EL" alt="App Icon" class="app-icon-large">
+                <h2>Welcome, <span id="welcome-name"></span>!</h2>
+                <p>Your branch: <span id="welcome-branch"></span></p>
+                <button id="lets-go-btn">Let's Go!</button>
+            </div>
+        </section>
+
+        <header id="app-header" class="hidden">
+            <div class="header-content">
+                <span class="app-name">Engineering Life</span>
+                <i class="fas fa-search"></i>
+            </div>
+        </header>
+
+        <section id="home-page" class="page hidden with-header with-footer">
+            <h2>All Courses</h2>
+            <div id="courses-grid" class="grid-container">
+                </div>
+        </section>
+
+        <section id="my-book-page" class="page hidden with-header with-footer">
+            <h2>My Enrolled Courses</h2>
+            <div id="enrolled-courses-grid" class="grid-container">
+                </div>
+        </section>
+
+        <section id="course-detail-page" class="page hidden with-header with-footer">
+            <h2 id="course-detail-title">Course Units</h2>
+             <button id="back-to-my-book" class="back-button"><i class="fas fa-arrow-left"></i> Back</button>
+            <div id="units-list">
+                </div>
+        </section>
+
+        <section id="unit-view-page" class="page hidden with-header with-footer">
+            <h2 id="unit-title">Unit Title</h2>
+            <button id="back-to-units" class="back-button"><i class="fas fa-arrow-left"></i> Back to Units</button>
+            <div id="unit-content">
+                <div id="video-container"></div>
+                <div id="audio-container"></div>
+                <div id="text-container"></div>
+                <button id="complete-unit-btn">Mark as Complete</button>
+            </div>
+        </section>
+
+        <section id="profile-page" class="page hidden with-header with-footer">
+            <h2>My Profile</h2>
+            <div class="profile-card">
+                <p><strong>Name:</strong> <span id="profile-name"></span></p>
+                <p><strong>Email:</strong> <span id="profile-email"></span></p>
+                <p><strong>Mobile:</strong> <span id="profile-mobile"></span></p>
+                <p><strong>Branch:</strong> <span id="profile-branch"></span></p>
+            </div>
+            <div class="profile-actions">
+                <button class="profile-btn"><i class="fas fa-question-circle"></i> Help</button>
+                <button class="profile-btn"><i class="fas fa-envelope"></i> Feedback</button>
+                <button id="logout-btn" class="profile-btn danger"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </section>
+
+    </main>
+    
+    <button id="chat-bot-btn">
+        <i class="fas fa-comment-dots"></i>
+    </button>
+
+    <footer id="app-footer" class="hidden">
+        <nav>
+            <a href="#home" class="nav-link active" data-page="home-page"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="#my-book" class="nav-link" data-page="my-book-page"><i class="fas fa-book"></i><span>My Book</span></a>
+            <a href="#profile" class="nav-link" data-page="profile-page"><i class="fas fa-user"></i><span>Profile</span></a>
+        </nav>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="supabase.js"></script>
+    <script type="module" src="app.js"></script>
+
+</body>
+</html>
