@@ -1,0 +1,360 @@
+/* --- Global Styles & Variables --- */
+:root {
+    --primary-color: #6a11cb;
+    --secondary-color: #2575fc;
+    --background-color: #f4f7f6;
+    --card-bg-color: #ffffff;
+    --text-color: #333;
+    --light-text-color: #777;
+    --white-color: #fff;
+    --danger-color: #e74c3c;
+    --success-color: #2ecc71;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --border-radius: 12px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+/* --- Page & Layout --- */
+.page {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.page-content {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.with-header {
+    padding-top: 80px; /* Space for fixed header */
+}
+
+.with-footer {
+    padding-bottom: 80px; /* Space for fixed footer */
+}
+
+.hidden {
+    display: none !important;
+}
+
+h1 {
+    font-size: 2.2rem;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+h2 {
+    width: 100%;
+    text-align: left;
+    font-size: 1.8rem;
+    color: var(--text-color);
+    margin-bottom: 20px;
+}
+
+/* --- Header & Footer --- */
+#app-header, #app-footer {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    background: var(--white-color);
+    box-shadow: var(--box-shadow);
+    z-index: 100;
+}
+
+#app-header {
+    top: 0;
+    height: 60px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    padding: 0 20px;
+}
+
+.app-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+#app-header .fa-search {
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
+#app-footer {
+    bottom: 0;
+    height: 65px;
+    border-top: 1px solid #eee;
+}
+
+#app-footer nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 100%;
+}
+
+.nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--light-text-color);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.3s;
+}
+
+.nav-link i {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+}
+
+.nav-link.active {
+    color: var(--primary-color);
+}
+
+/* --- Forms & Buttons --- */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+input, select {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+}
+
+button {
+    padding: 15px;
+    border: none;
+    border-radius: var(--border-radius);
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: var(--white-color);
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.back-button {
+    align-self: flex-start;
+    margin-bottom: 20px;
+    background: #eee;
+    color: var(--text-color);
+    font-size: 1rem;
+    padding: 10px 15px;
+}
+
+.message {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+/* --- Cards --- */
+.grid-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.course-card {
+    background: var(--card-bg-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.course-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.course-card-content {
+    padding: 15px;
+}
+
+.course-card h3 {
+    margin-bottom: 8px;
+    font-size: 1.2rem;
+}
+
+.course-card p {
+    font-size: 0.9rem;
+    color: var(--light-text-color);
+    margin-bottom: 15px;
+}
+
+.course-card button {
+    width: 100%;
+    font-size: 1rem;
+}
+.course-card button.view-btn {
+    background: var(--success-color);
+}
+
+
+/* --- Profile Page --- */
+.profile-card {
+    width: 100%;
+    background: var(--card-bg-color);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    text-align: left;
+}
+.profile-card p {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+.profile-card strong {
+    color: var(--primary-color);
+}
+.profile-actions {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.profile-btn {
+    background: var(--card-bg-color);
+    color: var(--text-color);
+    border: 1px solid #eee;
+    text-align: left;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-weight: normal;
+}
+.profile-btn.danger {
+    color: var(--danger-color);
+}
+
+/* --- Unit/Detail Pages --- */
+#units-list, #unit-content {
+    width: 100%;
+}
+.unit-item {
+    background: var(--white-color);
+    padding: 20px;
+    margin-bottom: 10px;
+    border-radius: var(--border-radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.unit-item:hover {
+    background-color: #f0f0f0;
+}
+.unit-item.completed {
+    color: var(--light-text-color);
+    background-color: #e9f7ef;
+}
+.unit-item.completed .fa-check-circle {
+    color: var(--success-color);
+}
+
+#video-container, #audio-container, #text-container {
+    margin-bottom: 20px;
+}
+video {
+    width: 100%;
+    border-radius: var(--border-radius);
+}
+audio {
+    width: 100%;
+}
+#text-container {
+    background: var(--white-color);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    line-height: 1.6;
+    text-align: left;
+}
+
+/* --- Chat Bot Button --- */
+#chat-bot-btn {
+    position: fixed;
+    bottom: 85px; /* Above footer */
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-size: 1.8rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 101;
+}
+
+/* --- Miscellaneous --- */
+.app-icon-large {
+    width: 100px;
+    height: 100px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+.text-center {
+    text-align: center;
+}
+
+/* --- Responsive Desktop Styles --- */
+@media (min-width: 768px) {
+    .page-content {
+        max-width: 600px;
+    }
+
+    #home-page, #my-book-page {
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+
+    .grid-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .grid-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
