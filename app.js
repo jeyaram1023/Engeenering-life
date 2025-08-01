@@ -1,3 +1,4 @@
+
 import { supabase } from './supabase.js';
 
 // --- DOM ELEMENTS ---
@@ -61,7 +62,12 @@ const handleLogin = async (e) => {
     loginMessage.textContent = '';
 
     try {
-        const { error } = await supabase.auth.signInWithOtp({ email });
+        const { error } = await supabase.auth.signInWithOtp({
+            email,
+            options: {
+                emailRedirectTo: 'https://jeyaram1023.github.io/Engeenering-life/'
+            }
+        });
         if (error) throw error;
         loginMessage.textContent = '✅ Success! Check your email for the magic link.';
         loginMessage.style.color = 'var(--success-color)';
@@ -87,7 +93,7 @@ const fetchStudentProfile = async (userId) => {
         .eq('id', userId)
         .single();
     
-    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
+    if (error && error.code !== 'PGRST116') {
         console.error('Fetch Profile Error:', error);
         return null;
     }
@@ -171,7 +177,6 @@ const loadCourseDetailPage = async (courseId) => {
     units.forEach(unit => {
         const unitItem = document.createElement('div');
         unitItem.className = 'unit-item';
-        // TODO: Add logic to check if unit is completed
         unitItem.innerHTML = `
             <span>${unit.title}</span>
             <i class="fas fa-play-circle"></i>
@@ -195,7 +200,6 @@ const loadUnitViewPage = (unit) => {
     showPage('unit-view-page');
 };
 
-
 const loadProfilePage = async () => {
     const profile = await fetchStudentProfile(currentUser.id);
     if(profile) {
@@ -206,7 +210,6 @@ const loadProfilePage = async () => {
     }
     showPage('profile-page');
 };
-
 
 // --- EVENT HANDLERS ---
 const handleStudentInfoSubmit = async (e) => {
@@ -243,7 +246,7 @@ const handleEnroll = async (courseId) => {
         console.error(error);
     } else {
         alert('Successfully enrolled!');
-        loadHomePage(); // Refresh to show "View Course"
+        loadHomePage();
     }
 };
 
@@ -275,14 +278,10 @@ const checkUserSession = async () => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Auth listeners
     loginForm.addEventListener('submit', handleLogin);
     logoutBtn.addEventListener('click', handleLogout);
-    
-    // Form submission
     studentInfoForm.addEventListener('submit', handleStudentInfoSubmit);
 
-    // Navigation
     document.querySelector('#app-footer nav').addEventListener('click', (e) => {
         const navLink = e.target.closest('.nav-link');
         if (!navLink) return;
@@ -297,17 +296,14 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (pageId === 'profile-page') loadProfilePage();
         else showPage(pageId);
     });
-    
-    // Button Clicks
+
     letsGoBtn.addEventListener('click', loadHomePage);
     backToMyBookBtn.addEventListener('click', loadMyBookPage);
     backToUnitsBtn.addEventListener('click', () => loadCourseDetailPage(currentCourseId));
 
-    // Dynamic grid clicks (enroll/view)
     coursesGrid.addEventListener('click', handleGridClick);
     enrolledCoursesGrid.addEventListener('click', handleGridClick);
 
-    // Initial check
     checkUserSession();
 });
 
