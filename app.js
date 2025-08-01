@@ -30,7 +30,6 @@ const profileName = document.getElementById('profile-name');
 const profileEmail = document.getElementById('profile-email');
 const profileMobile = document.getElementById('profile-mobile');
 const profileBranch = document.getElementById('profile-branch');
-
 const welcomeName = document.getElementById('welcome-name');
 const welcomeBranch = document.getElementById('welcome-branch');
 
@@ -40,7 +39,7 @@ let currentCourseId = null;
 
 // --- PAGE ROUTING ---
 const showPage = (pageId) => {
-  pages.forEach(p => p.classList.add('hidden'));
+  pages.forEach(page => page.classList.add('hidden'));
   document.getElementById(pageId).classList.remove('hidden');
 
   const mainPages = ['home-page', 'my-book-page', 'profile-page', 'course-detail-page', 'unit-view-page'];
@@ -63,15 +62,15 @@ const handleLogin = async (e) => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: 'https://jeyaram1023.github.io/Engeenering-life/',
+        emailRedirectTo: 'https://jeyaram1023.github.io/Engeenering-life/' // ✅ Change if needed
       }
     });
     if (error) throw error;
-    loginMessage.textContent = '✅ Success! Check your email.';
+    loginMessage.textContent = '✅ Check your email for the magic link.';
     loginMessage.style.color = 'green';
     loginForm.reset();
-  } catch (err) {
-    loginMessage.textContent = `❌ Error: ${err.message}`;
+  } catch (error) {
+    loginMessage.textContent = `❌ ${error.message}`;
     loginMessage.style.color = 'red';
   }
 };
@@ -82,7 +81,7 @@ const handleLogout = async () => {
   showPage('login-page');
 };
 
-// --- PROFILE FETCH ---
+// --- FETCH STUDENT PROFILE ---
 const fetchStudentProfile = async (userId) => {
   const { data, error } = await supabase
     .from('students')
@@ -91,29 +90,63 @@ const fetchStudentProfile = async (userId) => {
     .single();
 
   if (error && error.code !== 'PGRST116') {
-    console.error('Fetch profile error:', error);
+    console.error('Fetch error:', error);
     return null;
   }
+
   return data;
 };
 
-// --- HOME PAGE ---
-const loadHomePage = async () => {
-  const { data: courses, error: coursesError } = await supabase.from('courses').select('*');
-  if (coursesError) return console.error('Courses Error:', coursesError);
+// --- STUDENT INFO SUBMIT ---
+const handleStudentInfoSubmit = async (e) => {
+  e.preventDefault();
 
-  const { data: enrollments, error: enrollmentsError } = await supabase
+  // ✅ Force get session if currentUser is null
+  if (!currentUser) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      alert('Session not found. Please login again.');
+      return showPage('login-page');
+    }
+    currentUser = session.user;
+  }
+
+  const name = document.getElementById('name-input').value;
+  const mobile = document.getElementById('mobile-input').value;
+  const branch = document.getElementById('branch-select').value;
+
+  const { error } = await supabase.from('students').upsert({
+    id: currentUser.id,
+    email: currentUser.email,
+    name,
+    mobile,
+    branch,
+    updated_at: new Date()
+  });
+
+  if (error) {
+    console.error('❌ Error saving student info:', error);
+    alert('Error saving student info');
+  } else {
+    welcomeName.textContent = name;
+    welcomeBranch.textContent = branch;
+    showPage('welcome-page');
+  }
+};
+
+// --- LOAD PAGES ---
+const loadHomePage = async () => {
+  const { data: courses } = await supabase.from('courses').select('*');
+  const { data: enrollments } = await supabase
     .from('enrollments')
     .select('course_id')
     .eq('student_id', currentUser.id);
 
-  if (enrollmentsError) return console.error('Enrollments Error:', enrollmentsError);
-
-  const enrolledCourseIds = new Set(enrollments.map(e => e.course_id));
-
+  const enrolledIds = new Set(enrollments.map(e => e.course_id));
   coursesGrid.innerHTML = '';
+
   courses.forEach(course => {
-    const isEnrolled = enrolledCourseIds.has(course.id);
+    const isEnrolled = enrolledIds.has(course.id);
     const card = document.createElement('div');
     card.className = 'course-card';
     card.innerHTML = `
@@ -131,18 +164,16 @@ const loadHomePage = async () => {
   showPage('home-page');
 };
 
-// --- MY BOOK PAGE ---
 const loadMyBookPage = async () => {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('enrollments')
     .select('courses(*)')
     .eq('student_id', currentUser.id);
 
-  if (error) return console.error('Enrolled courses error:', error);
-
   enrolledCoursesGrid.innerHTML = '';
+
   if (data.length === 0) {
-    enrolledCoursesGrid.innerHTML = '<p>No enrolled courses yet.</p>';
+    enrolledCoursesGrid.innerHTML = '<p>No courses enrolled.</p>';
     return;
   }
 
@@ -162,10 +193,8 @@ const loadMyBookPage = async () => {
   showPage('my-book-page');
 };
 
-// --- COURSE DETAIL ---
 const loadCourseDetailPage = async (courseId) => {
   currentCourseId = courseId;
-
   const { data: course } = await supabase.from('courses').select('title').eq('id', courseId).single();
   const { data: units } = await supabase.from('units').select('*').eq('course_id', courseId).order('unit_order');
 
@@ -183,7 +212,6 @@ const loadCourseDetailPage = async (courseId) => {
   showPage('course-detail-page');
 };
 
-// --- UNIT VIEW ---
 const loadUnitViewPage = (unit) => {
   document.getElementById('unit-title').textContent = unit.title;
   document.getElementById('video-container').innerHTML = unit.video_url ? `<video src="${unit.video_url}" controls></video>` : '';
@@ -192,7 +220,6 @@ const loadUnitViewPage = (unit) => {
   showPage('unit-view-page');
 };
 
-// --- PROFILE PAGE ---
 const loadProfilePage = async () => {
   const profile = await fetchStudentProfile(currentUser.id);
   if (profile) {
@@ -204,38 +231,7 @@ const loadProfilePage = async () => {
   showPage('profile-page');
 };
 
-// --- STUDENT INFO FORM SUBMIT ---
-const handleStudentInfoSubmit = async (e) => {
-  e.preventDefault();
-
-  if (!currentUser) {
-    alert("User not authenticated. Try logging in again.");
-    return;
-  }
-
-  const name = document.getElementById('name-input').value;
-  const mobile = document.getElementById('mobile-input').value;
-  const branch = document.getElementById('branch-select').value;
-
-  const { error } = await supabase.from('students').upsert({
-    id: currentUser.id,
-    email: currentUser.email,
-    name,
-    mobile,
-    branch,
-    updated_at: new Date()
-  });
-
-  if (error) {
-    console.error('Student save error:', error);
-  } else {
-    welcomeName.textContent = name;
-    welcomeBranch.textContent = branch;
-    showPage('welcome-page');
-  }
-};
-
-// --- COURSE ENROLL ---
+// --- ENROLL ---
 const handleEnroll = async (courseId) => {
   const { error } = await supabase.from('enrollments').insert({
     student_id: currentUser.id,
@@ -243,21 +239,21 @@ const handleEnroll = async (courseId) => {
   });
 
   if (error) {
-    alert('Error enrolling. You may already be enrolled.');
+    alert('Already enrolled or error!');
   } else {
-    alert('Enrolled successfully!');
+    alert('Successfully enrolled!');
     loadHomePage();
   }
 };
 
-// --- GRID CLICK ---
+// --- CLICK HANDLER ---
 const handleGridClick = (e) => {
-  const btn = e.target.closest('button');
-  if (!btn) return;
+  const target = e.target.closest('button');
+  if (!target) return;
 
-  const courseId = btn.dataset.courseId;
-  if (btn.classList.contains('enroll-btn')) handleEnroll(courseId);
-  else if (btn.classList.contains('view-btn')) loadCourseDetailPage(courseId);
+  const courseId = target.dataset.courseId;
+  if (target.classList.contains('enroll-btn')) handleEnroll(courseId);
+  else if (target.classList.contains('view-btn')) loadCourseDetailPage(courseId);
 };
 
 // --- SESSION CHECK ---
@@ -285,10 +281,14 @@ document.addEventListener('DOMContentLoaded', () => {
   letsGoBtn.addEventListener('click', loadHomePage);
   backToMyBookBtn?.addEventListener('click', loadMyBookPage);
   backToUnitsBtn?.addEventListener('click', () => loadCourseDetailPage(currentCourseId));
+  coursesGrid.addEventListener('click', handleGridClick);
+  enrolledCoursesGrid.addEventListener('click', handleGridClick);
 
+  // Bottom nav
   document.querySelector('#app-footer nav').addEventListener('click', (e) => {
     const navLink = e.target.closest('.nav-link');
     if (!navLink) return;
+
     e.preventDefault();
     document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
     navLink.classList.add('active');
@@ -300,13 +300,10 @@ document.addEventListener('DOMContentLoaded', () => {
     else showPage(pageId);
   });
 
-  coursesGrid.addEventListener('click', handleGridClick);
-  enrolledCoursesGrid.addEventListener('click', handleGridClick);
-
   checkUserSession();
 });
 
-// --- AUTH STATE LISTENER ---
+// --- AUTH LISTENER ---
 supabase.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN') {
     currentUser = session.user;
