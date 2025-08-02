@@ -1,1 +1,38 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Vision AI - Image Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="index.html">Home</a>
+        <a href="image.html" class="active">Image Analyzer</a>
+        <a href="voice.html">Live Chat</a>
+    </nav>
+    <div class="chat-title">IMAGE ANALYZER</div>
+    <div class="chat-container">
+        <div class="image-upload-area" id="image-upload-area">
+            <p>Drag & Drop Image Here or Click to Upload</p>
+            <input type="file" id="image-input" accept="image/*" class="hidden">
+        </div>
+        <div class="image-preview-container" id="image-preview-container">
+            <img id="uploaded-image-preview" src="#" alt="Image Preview" class="hidden">
+            <button id="clear-image-button" class="hidden">Clear Image</button>
+        </div>
+        <button id="analyze-image-button" class="disabled" disabled>Analyze Image</button>
+        <div class="ai-description-container">
+            <h3>AI Description:</h3>
+            <p id="ai-description-text"></p>
+            <div class="tts-controls">
+                <button id="speak-description-button" class="hidden">🔊 Speak</button>
+                <button id="play-pause-description-button" class="hidden">⏯️ Play/Pause</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+              </html>
