@@ -1,38 +1,51 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Vision AI - Image Analyzer</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Vision AI - Live Chat</title>
+    <link rel="stylesheet" href="chat.css">
 </head>
 <body>
     <nav class="top-nav">
         <a href="index.html">Home</a>
-        <a href="image.html" class="active">Image Analyzer</a>
-        <a href="voice.html">Live Chat</a>
+        <a href="image.html">Image Analyzer</a>
+        <a href="voice.html" class="active">Live Chat</a>
     </nav>
-    <div class="chat-title">IMAGE ANALYZER</div>
+    <div class="chat-title">CHATBOT</div>
     <div class="chat-container">
-        <div class="image-upload-area" id="image-upload-area">
-            <p>Drag & Drop Image Here or Click to Upload</p>
-            <input type="file" id="image-input" accept="image/*" class="hidden">
-        </div>
-        <div class="image-preview-container" id="image-preview-container">
-            <img id="uploaded-image-preview" src="#" alt="Image Preview" class="hidden">
-            <button id="clear-image-button" class="hidden">Clear Image</button>
-        </div>
-        <button id="analyze-image-button" class="disabled" disabled>Analyze Image</button>
-        <div class="ai-description-container">
-            <h3>AI Description:</h3>
-            <p id="ai-description-text"></p>
-            <div class="tts-controls">
-                <button id="speak-description-button" class="hidden">🔊 Speak</button>
-                <button id="play-pause-description-button" class="hidden">⏯️ Play/Pause</button>
+        <div class="chat-body" id="chat-body"></div>
+        <div class="chat-footer">
+            <div class="clip-container">
+                <button id="clip-button">📎</button>
+                <div class="clip-dropdown">
+                    <button id="file-upload">Upload File</button>
+                    <input type="file" id="file-input" class="hidden" accept="image/*" />
+                    <button id="clear-file">Clear File</button>
+                    <button id="camera-button">Camera</button>
+                    <button id="voice-input">🎙️ Voice</button>
+                    <button id="toggle-tts">🔊 TTS</button>
+                    <select id="language-selector">
+                        <option value="en">English</option>
+                        <option value="hi">Hindi</option>
+                        <option value="ta">Tamil</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="ja">Japanese</option>
+                        <option value="zh">Chinese</option>
+                    </select>
+                </div>
             </div>
+            <input type="text" class="message-input" id="message-input" placeholder="Type a message..." />
+            <button id="send-message">></button>
+        </div>
+        <div class="chat-options">
+            <button id="save-chat">💾 Save Chat</button>
+            <button id="clear-chat">🧹 Clear Chat</button>
+            <button id="reset-chat">🔄 Reset Chat</button>
         </div>
     </div>
-    <script src="script.js"></script>
+    <script src="chat.js"></script>
 </body>
-              </html>
+                        </html>
