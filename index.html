@@ -7,22 +7,31 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* PIX Button style */
+        /* PIX Button style in footer */
         .pix-button {
             background-color: #6a0dad; /* purple */
             color: white;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
+            padding: 10px 18px;
+            border-radius: 30px;
             cursor: pointer;
-            margin-top: 20px;
             transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         .pix-button:hover {
             background-color: #9b30ff;
             transform: scale(1.05);
+        }
+        /* footer nav layout update */
+        #app-footer nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px;
         }
     </style>
 </head>
@@ -81,9 +90,6 @@
         <section id="home-page" class="page hidden with-header with-footer">
             <h2>All Courses</h2>
             <div id="courses-grid" class="grid-container"></div>
-
-            <!-- PIX Button -->
-            <button id="pix-btn" class="pix-button">PIX</button>
         </section>
 
         <section id="my-book-page" class="page hidden with-header with-footer">
@@ -136,6 +142,8 @@
             <a href="#home" class="nav-link active" data-page="home-page"><i class="fas fa-home"></i><span>Home</span></a>
             <a href="#my-book" class="nav-link" data-page="my-book-page"><i class="fas fa-book"></i><span>My Book</span></a>
             <a href="#profile" class="nav-link" data-page="profile-page"><i class="fas fa-user"></i><span>Profile</span></a>
+            <!-- PIX Button in Footer -->
+            <button id="pix-btn" class="pix-button"><i class="fas fa-link"></i> Doubt</button>
         </nav>
     </footer>
 
@@ -150,7 +158,7 @@
             if (pixBtn) {
                 pixBtn.addEventListener("click", () => {
                     // இங்கே உங்க link வை
-                    window.open("https://your-link-here.com", "_blank");
+                    window.open("https://jeyaram1023.github.io/doubt-wala/", "_blank");
                 });
             }
         });
