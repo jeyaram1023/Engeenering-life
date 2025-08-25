@@ -6,6 +6,25 @@
     <title>Engineering Life</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* PIX Button style */
+        .pix-button {
+            background-color: #6a0dad; /* purple */
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+        .pix-button:hover {
+            background-color: #9b30ff;
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
 
@@ -61,21 +80,21 @@
 
         <section id="home-page" class="page hidden with-header with-footer">
             <h2>All Courses</h2>
-            <div id="courses-grid" class="grid-container">
-                </div>
+            <div id="courses-grid" class="grid-container"></div>
+
+            <!-- PIX Button -->
+            <button id="pix-btn" class="pix-button">PIX</button>
         </section>
 
         <section id="my-book-page" class="page hidden with-header with-footer">
             <h2>My Enrolled Courses</h2>
-            <div id="enrolled-courses-grid" class="grid-container">
-                </div>
+            <div id="enrolled-courses-grid" class="grid-container"></div>
         </section>
 
         <section id="course-detail-page" class="page hidden with-header with-footer">
             <h2 id="course-detail-title">Course Units</h2>
              <button id="back-to-my-book" class="back-button"><i class="fas fa-arrow-left"></i> Back</button>
-            <div id="units-list">
-                </div>
+            <div id="units-list"></div>
         </section>
 
         <section id="unit-view-page" class="page hidden with-header with-footer">
@@ -107,9 +126,9 @@
     </main>
     
     <a href="chat.html">
-  <button id="chat-bot-btn">
-    <i class="fas fa-comment-dots"></i>
-  </button>
+        <button id="chat-bot-btn">
+            <i class="fas fa-comment-dots"></i>
+        </button>
     </a>
 
     <footer id="app-footer" class="hidden">
@@ -123,6 +142,19 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="supabase.js"></script>
     <script type="module" src="app.js"></script>
+
+    <script>
+        // PIX button click event
+        document.addEventListener("DOMContentLoaded", () => {
+            const pixBtn = document.getElementById("pix-btn");
+            if (pixBtn) {
+                pixBtn.addEventListener("click", () => {
+                    // இங்கே உங்க link வை
+                    window.open("https://your-link-here.com", "_blank");
+                });
+            }
+        });
+    </script>
 
 </body>
 </html>
