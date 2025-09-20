@@ -1,5 +1,5 @@
 // --- Common Elements and Variables (used across pages) ---
-const API_KEY = "AIzaSyD6t67ErOa0NY7ZoAhREjzIhuuoK2IZzV0"; // Replace with your actual API key
+const API_KEY = "AIzaSyCxAq5HIutyqciDR4uMhc36-7mLhsAkF9w"; // Replace with your actual API key
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
 const userData = {
