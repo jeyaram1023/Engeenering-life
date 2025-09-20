@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Voice Assistant</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(145deg, #121212, #1f1f1f);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    h1 {
+      margin-bottom: 2rem;
+      font-size: 2.5rem;
+      color: #00ffe5;
+      text-shadow: 0 0 10px #00ffe5aa;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    button {
+      background: #00ffe5;
+      color: #000;
+      font-size: 1.2rem;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      box-shadow: 0 0 15px #00ffe577, 0 0 30px #00ffe533;
+      margin-top: 1rem;
+      animation: glowPulse 2s infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% {
+        box-shadow: 0 0 15px #00ffe577, 0 0 30px #00ffe533;
+      }
+      50% {
+        box-shadow: 0 0 25px #00ffe5, 0 0 40px #00ffe5aa;
+      }
+    }
+
+    #output {
+      margin-top: 1.5rem;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      text-align: left;
+      white-space: pre-wrap;
+      min-height: 100px;
+    }
+
+    .user {
+      color: #9effff;
+      font-weight: bold;
+    }
+
+    .ai {
+      color: #f5ff9e;
+      font-style: italic;
+    }
+
+    .typing::after {
+      content: "|";
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠Voice Assistant</h1>
+  <div class="glass-card">
+    <button onclick="startListening()">🎤 Tap to Speak</button>
+    <div id="output">Say something like: “What is the capital of France?”</div>
+  </div>
+
+  <script>
+    const API_KEY = "AIzaSyCxAq5HIutyqciDR4uMhc36-7mLhsAkF9w";
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+    const outputDiv = document.getElementById("output");
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      speechSynthesis.speak(utterance);
+    }
+
+    async function fetchGeminiReply(prompt) {
+      const body = {
+        contents: [{ parts: [{ text: prompt }] }]
+      };
+
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I didn't understand that.";
+      return reply;
+    }
+
+    function typeEffect(element, text, speed = 30) {
+      element.textContent = '';
+      let i = 0;
+      function type() {
+        if (i < text.length) {
+          element.textContent += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        } else {
+          element.classList.remove('typing');
+        }
+      }
+      element.classList.add('typing');
+      type();
+    }
+
+    function startListening() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.start();
+      outputDiv.innerHTML = "🎧 <em>Listening...</em>";
+
+      recognition.onresult = async (event) => {
+        const transcript = event.results[0][0].transcript;
+        outputDiv.innerHTML = `<span class="user">You:</span> ${transcript}<br><span class="ai">Gemini:</span> <span class="typing">Thinking...</span>`;
+
+        const reply = await fetchGeminiReply(transcript);
+        typeEffect(outputDiv, `You: ${transcript}\n\nGemini: ${reply}`);
+        speak(reply);
+      };
+
+      recognition.onerror = (event) => {
+        outputDiv.innerHTML = `<span style="color: red;">❌ Error:</span> ${event.error}`;
+      };
+    }
+  </script>
+</body>
+</html>
