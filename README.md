@@ -1,5 +1,7 @@
 # 🎓 Engineering Life – Online Course Platform
+<img width="528" height="496" alt="ene life" src="https://github.com/user-attachments/assets/eb849abe-32fd-4d61-acb3-f0694bc8dba4" />
 
+ 
 **Engineering Life** is a lightweight and responsive web-based platform designed for engineering students to learn, track, and complete courses online.  
 It uses **Supabase** as the backend for authentication, data storage, and media management.
 
