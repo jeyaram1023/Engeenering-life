@@ -7,6 +7,7 @@ It uses **Supabase** as the backend for authentication, data storage, and media 
 
 🔗 **Live App:** [https://jeyaram1023.github.io/Engeenering-life/](https://jeyaram1023.github.io/Engeenering-life/)
 
+[Open Admin Page](https://jeyaram1023.github.io/Engeenering-life/admin)
 ---
 
 ## 🚀 Features
