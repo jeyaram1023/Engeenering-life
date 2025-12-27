@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Life - Admin Panel</title>
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Engineering Life - Admin Panel</h1>
+    </header>
+
+    <main>
+        <div class="container">
+            <h2>Manage Courses</h2>
+            <form id="course-form" data-mode="add">
+                <input type="hidden" id="course-id">
+                <input type="text" id="course-title" placeholder="Course Title" required>
+                <textarea id="course-description" placeholder="Course Description" required></textarea>
+                <label for="course-cover-image">Cover Image (Upload)</label>
+                <input type="file" id="course-cover-image" accept="image/*">
+                <button type="submit">Save Course</button>
+            </form>
+            <div id="course-message" class="message"></div>
+            <h3>Existing Courses</h3>
+            <div id="courses-list" class="item-list">
+                </div>
+        </div>
+
+        <div class="container">
+            <h2>Manage Units</h2>
+            <form id="unit-form" data-mode="add">
+                <input type="hidden" id="unit-id">
+                <label for="course-select">Select Course</label>
+                <select id="course-select" required>
+                    <option value="">-- Please select a course --</option>
+                </select>
+                <input type="text" id="unit-title" placeholder="Unit Title" required>
+                <input type="number" id="unit-order" placeholder="Unit Order (e.g., 1, 2, 3)" required>
+                
+                <label for="unit-video-file">Video (Upload File)</label>
+                <input type="file" id="unit-video-file" accept="video/*">
+                <label for="unit-video-url">OR Paste Video URL</label>
+                <input type="url" id="unit-video-url" placeholder="https://example.com/video.mp4">
+                
+                <label for="unit-audio-file">Audio (Upload File)</label>
+                <input type="file" id="unit-audio-file" accept="audio/*">
+                <label for="unit-audio-url">OR Paste Audio URL</label>
+                <input type="url" id="unit-audio-url" placeholder="https://example.com/audio.mp3">
+                
+                <textarea id="unit-text-content" placeholder="Text Content for the unit"></textarea>
+                <button type="submit">Save Unit</button>
+            </form>
+            <div id="unit-message" class="message"></div>
+        </div>
+
+        <div id="units-list-container" class="container hidden">
+            <h3 id="units-list-heading">Units for Selected Course</h3>
+            <div id="units-list" class="item-list">
+                </div>
+        </div>
+    </main>
+    
+    <div id="loader" class="hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="admin.js"></script>
+</body>
+</html>
