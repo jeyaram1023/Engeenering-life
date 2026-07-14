@@ -1,74 +1,156 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Engineering Life - Admin Panel</title>
+    <title>Engineering Life — Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <header>
-        <h1>Engineering Life - Admin Panel</h1>
-    </header>
 
-    <main>
-        <div class="container">
-            <h2>Manage Courses</h2>
-            <form id="course-form" data-mode="add">
-                <input type="hidden" id="course-id">
-                <input type="text" id="course-title" placeholder="Course Title" required>
-                <textarea id="course-description" placeholder="Course Description" required></textarea>
-                <label for="course-cover-image">Cover Image (Upload)</label>
-                <input type="file" id="course-cover-image" accept="image/*">
-                <button type="submit">Save Course</button>
+    <!-- Loading state while we resolve the session + admin check -->
+    <div id="admin-loading" class="admin-state-screen">
+        <div class="admin-spinner"></div>
+        <p>Checking access…</p>
+    </div>
+
+    <!-- Not signed in -->
+    <div id="admin-login" class="admin-state-screen hidden">
+        <div class="admin-auth-card">
+            <img src="img/app-logo.png" alt="Engineering Life" class="admin-auth-logo">
+            <h1>Admin Sign In</h1>
+            <p>Sign in with your admin email to manage courses and units.</p>
+            <form id="admin-login-form">
+                <input type="email" id="admin-email-input" placeholder="Enter your admin email" required autocomplete="email">
+                <button type="submit" id="admin-login-btn">Send Magic Link</button>
             </form>
-            <div id="course-message" class="message"></div>
-            <h3>Existing Courses</h3>
-            <div id="courses-list" class="item-list">
-                </div>
+            <div id="admin-login-message" class="message" role="status" aria-live="polite"></div>
         </div>
+    </div>
 
-        <div class="container">
-            <h2>Manage Units</h2>
-            <form id="unit-form" data-mode="add">
-                <input type="hidden" id="unit-id">
-                <label for="course-select">Select Course</label>
-                <select id="course-select" required>
-                    <option value="">-- Please select a course --</option>
-                </select>
-                <input type="text" id="unit-title" placeholder="Unit Title" required>
-                <input type="number" id="unit-order" placeholder="Unit Order (e.g., 1, 2, 3)" required>
-                
-                <label for="unit-video-file">Video (Upload File)</label>
-                <input type="file" id="unit-video-file" accept="video/*">
-                <label for="unit-video-url">OR Paste Video URL</label>
-                <input type="url" id="unit-video-url" placeholder="https://example.com/video.mp4">
-                
-                <label for="unit-audio-file">Audio (Upload File)</label>
-                <input type="file" id="unit-audio-file" accept="audio/*">
-                <label for="unit-audio-url">OR Paste Audio URL</label>
-                <input type="url" id="unit-audio-url" placeholder="https://example.com/audio.mp3">
-                
-                <textarea id="unit-text-content" placeholder="Text Content for the unit"></textarea>
-                <button type="submit">Save Unit</button>
-            </form>
-            <div id="unit-message" class="message"></div>
+    <!-- Signed in but not an admin -->
+    <div id="admin-denied" class="admin-state-screen hidden">
+        <div class="admin-auth-card">
+            <i class="fas fa-lock admin-denied-icon"></i>
+            <h1>Access Denied</h1>
+            <p>This account doesn't have admin access. If you believe this is a mistake, contact the site owner.</p>
+            <button id="admin-denied-logout-btn">Sign Out</button>
         </div>
+    </div>
 
-        <div id="units-list-container" class="container hidden">
-            <h3 id="units-list-heading">Units for Selected Course</h3>
-            <div id="units-list" class="item-list">
+    <!-- The actual admin panel -->
+    <div id="admin-app" class="hidden">
+        <header class="admin-header">
+            <div class="admin-header-inner">
+                <div class="admin-brand">
+                    <img src="img/app-logo.png" alt="Engineering Life">
+                    <span>Admin Panel</span>
                 </div>
-        </div>
-    </main>
-    
+                <div class="admin-header-actions">
+                    <span id="admin-email-display" class="admin-email-display"></span>
+                    <button id="admin-logout-btn" class="admin-logout-btn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+                </div>
+            </div>
+            <nav class="admin-tabs">
+                <button class="admin-tab active" data-tab="courses-tab"><i class="fas fa-layer-group"></i> Courses</button>
+                <button class="admin-tab" data-tab="units-tab"><i class="fas fa-list-check"></i> Units</button>
+            </nav>
+        </header>
+
+        <main class="admin-main">
+
+            <section id="courses-tab" class="admin-tab-panel">
+                <div class="admin-grid">
+                    <div class="container">
+                        <h2 id="course-form-heading">Add New Course</h2>
+                        <form id="course-form" data-mode="add">
+                            <input type="hidden" id="course-id">
+                            <label for="course-title">Course Title</label>
+                            <input type="text" id="course-title" placeholder="e.g. Digital Signal Processing" required>
+                            <label for="course-description">Description</label>
+                            <textarea id="course-description" placeholder="A short summary students will see on the course card" required></textarea>
+                            <label for="course-cover-image">Cover Image</label>
+                            <input type="file" id="course-cover-image" accept="image/*">
+                            <div id="course-image-preview" class="image-preview hidden"></div>
+                            <div class="form-actions">
+                                <button type="submit" id="course-submit-btn">Save Course</button>
+                                <button type="button" id="course-cancel-edit-btn" class="secondary-btn hidden">Cancel Edit</button>
+                            </div>
+                        </form>
+                        <div id="course-message" class="message"></div>
+                    </div>
+
+                    <div class="container">
+                        <div class="list-heading-row">
+                            <h2>Existing Courses</h2>
+                            <span id="courses-count" class="count-badge">0</span>
+                        </div>
+                        <div id="courses-list" class="item-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="units-tab" class="admin-tab-panel hidden">
+                <div class="admin-grid">
+                    <div class="container">
+                        <h2 id="unit-form-heading">Add New Unit</h2>
+                        <form id="unit-form" data-mode="add">
+                            <input type="hidden" id="unit-id">
+                            <label for="course-select">Course</label>
+                            <select id="course-select" required>
+                                <option value="">-- Select a course --</option>
+                            </select>
+                            <label for="unit-title">Unit Title</label>
+                            <input type="text" id="unit-title" placeholder="e.g. Unit 1 — Introduction" required>
+                            <label for="unit-order">Unit Order</label>
+                            <input type="number" id="unit-order" placeholder="1" min="1" required>
+
+                            <label for="unit-video-file">Video — Upload File</label>
+                            <input type="file" id="unit-video-file" accept="video/*">
+                            <label for="unit-video-url">Video — OR Paste URL (YouTube or direct file link)</label>
+                            <input type="url" id="unit-video-url" placeholder="https://youtube.com/watch?v=… or https://…/video.mp4">
+
+                            <label for="unit-audio-file">Audio — Upload File</label>
+                            <input type="file" id="unit-audio-file" accept="audio/*">
+                            <label for="unit-audio-url">Audio — OR Paste URL</label>
+                            <input type="url" id="unit-audio-url" placeholder="https://example.com/audio.mp3">
+
+                            <label for="unit-text-content">Text Content</label>
+                            <textarea id="unit-text-content" placeholder="Optional reading content for this unit"></textarea>
+
+                            <div class="form-actions">
+                                <button type="submit" id="unit-submit-btn">Save Unit</button>
+                                <button type="button" id="unit-cancel-edit-btn" class="secondary-btn hidden">Cancel Edit</button>
+                            </div>
+                        </form>
+                        <div id="unit-message" class="message"></div>
+                    </div>
+
+                    <div id="units-list-container" class="container hidden">
+                        <div class="list-heading-row">
+                            <h3 id="units-list-heading">Units</h3>
+                            <span id="units-count" class="count-badge">0</span>
+                        </div>
+                        <div id="units-list" class="item-list"></div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
     <div id="loader" class="hidden">
         <div class="spinner"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- supabase-js is loaded as an ES module inside supabase.js — no separate
+         UMD <script> tag needed here, that would just create a second,
+         unused client library instance. -->
+    <script type="module" src="supabase.js"></script>
     <script type="module" src="admin.js"></script>
 </body>
 </html>
