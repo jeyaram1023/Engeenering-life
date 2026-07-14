@@ -5,6 +5,7 @@ CREATE TABLE students (
   name TEXT,
   mobile TEXT,
   branch TEXT,
+  is_admin BOOLEAN DEFAULT false, -- gates write access to courses/units (admin panel)
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -57,6 +58,14 @@ CREATE POLICY "Allow individual read access on students"
 ON students FOR SELECT
 USING (auth.uid() = id);
 
+-- Policy: Users can create their own profile row (THIS WAS MISSING)
+-- Without this, the upsert() in handleStudentInfoSubmit silently fails
+-- with an RLS violation for every brand-new user, because RLS enabled
+-- with no INSERT policy denies all inserts by default.
+CREATE POLICY "Allow individual insert access on students"
+ON students FOR INSERT
+WITH CHECK (auth.uid() = id);
+
 -- Policy: Users can update their own profile info
 CREATE POLICY "Allow individual update access on students"
 ON students FOR UPDATE
@@ -85,6 +94,135 @@ ON units FOR SELECT
 TO authenticated
 USING (true);
 
+-- Courses and units previously had NO RLS enabled at all — meaning any
+-- holder of the public anon key (i.e. anyone, since it ships in the
+-- frontend JS by design) could insert/update/delete courses and units
+-- directly via the Supabase API, with no login and no admin check.
+ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE units ENABLE ROW LEVEL SECURITY;
+
+-- Admin-only write access, gated on students.is_admin.
+-- To make yourself an admin, run once after signing up:
+--   UPDATE students SET is_admin = true WHERE email = 'your-email@example.com';
+CREATE POLICY "Allow admin insert on courses"
+ON courses FOR INSERT TO authenticated
+WITH CHECK (EXISTS (SELECT 1 FROM students WHERE id = auth.uid() AND is_admin = true));
+
+CREATE POLICY "Allow admin update on courses"
+ON courses FOR UPDATE TO authenticated
+USING (EXISTS (SELECT 1 FROM students WHERE id = auth.uid() AND is_admin = true));
+
+CREATE POLICY "Allow admin delete on courses"
+ON courses FOR DELETE TO authenticated
+USING (EXISTS (SELECT 1 FROM students WHERE id = auth.uid() AND is_admin = true));
+
+CREATE POLICY "Allow admin insert on units"
+ON units FOR INSERT TO authenticated
+WITH CHECK (EXISTS (SELECT 1 FROM students WHERE id = auth.uid() AND is_admin = true));
+
+CREATE POLICY "Allow admin update on units"
+ON units FOR UPDATE TO authenticated
+USING (EXISTS (SELECT 1 FROM students WHERE id = auth.uid() AND is_admin = true));
+
+CREATE POLICY "Allow admin delete on units"
+ON units FOR DELETE TO authenticated
+USING (EXISTS (SELECT 1 FROM students WHERE id = auth.uid() AND is_admin = true));
+
+-- Policy: Users can update their own enrollment (needed for progress/completed_units tracking)
+CREATE POLICY "Allow individual update access on enrollments"
+ON enrollments FOR UPDATE
+USING (auth.uid() = student_id);
+
+-- Policy: Users can submit their own feedback (feedback table had RLS on with zero policies,
+-- meaning it was previously 100% inaccessible, including to its owner)
+CREATE POLICY "Allow individual insert access on feedback"
+ON feedback FOR INSERT
+WITH CHECK (auth.uid() = student_id);
+
+-- Policy: Users can read their own feedback
+CREATE POLICY "Allow individual read access on feedback"
+ON feedback FOR SELECT
+USING (auth.uid() = student_id);
+
 -- 7. Make the Storage bucket for media public
 -- NOTE: This step is done in the Supabase Dashboard UI.
 -- Go to Storage -> Create a new bucket named 'course-media' -> Make it public.
+-- Also restrict who can WRITE to it: Storage -> course-media -> Policies ->
+-- add an INSERT policy scoped to admins only, mirroring the is_admin check
+-- above, so random anon-key holders can't upload files into your bucket
+-- even though the bucket itself is public for reading.
+
+
+-- =====================================================
+-- MIGRATION — run this instead of the CREATE TABLE statements above if
+-- your database already exists in production (tables already created).
+-- Safe to run multiple times.
+-- =====================================================
+
+ALTER TABLE students ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false;
+
+ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE units ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow admin insert on courses" ON courses;
+CREATE POLICY "Allow admin insert on courses"
+ON courses FOR INSERT TO authenticated
+WITH CHECK (EXISTS (SELECT 1 FROM students WHERE id = auth.uid() AND is_admin = true));
+
+DROP POLICY IF EXISTS "Allow admin update on courses" ON courses;
+CREATE POLICY "Allow admin update on courses"
+ON courses FOR UPDATE TO authenticated
+USING (EXISTS (SELECT 1 FROM students WHERE id = auth.uid() AND is_admin = true));
+
+DROP POLICY IF EXISTS "Allow admin delete on courses" ON courses;
+CREATE POLICY "Allow admin delete on courses"
+ON courses FOR DELETE TO authenticated
+USING (EXISTS (SELECT 1 FROM students WHERE id = auth.uid() AND is_admin = true));
+
+DROP POLICY IF EXISTS "Allow admin insert on units" ON units;
+CREATE POLICY "Allow admin insert on units"
+ON units FOR INSERT TO authenticated
+WITH CHECK (EXISTS (SELECT 1 FROM students WHERE id = auth.uid() AND is_admin = true));
+
+DROP POLICY IF EXISTS "Allow admin update on units" ON units;
+CREATE POLICY "Allow admin update on units"
+ON units FOR UPDATE TO authenticated
+USING (EXISTS (SELECT 1 FROM students WHERE id = auth.uid() AND is_admin = true));
+
+DROP POLICY IF EXISTS "Allow admin delete on units" ON units;
+CREATE POLICY "Allow admin delete on units"
+ON units FOR DELETE TO authenticated
+USING (EXISTS (SELECT 1 FROM students WHERE id = auth.uid() AND is_admin = true));
+
+-- Then make yourself an admin (run once, after you've signed in at least
+-- once so your row in `students` exists):
+--   UPDATE students SET is_admin = true WHERE email = 'your-email@example.com';
+
+
+-- =====================================================
+-- DATA API GRANTS
+-- =====================================================
+-- RLS policies alone are not enough. Grants and RLS are two separate gates:
+-- a GRANT decides whether a Postgres role can reach a table via the Data
+-- API (what supabase-js actually calls) at all; RLS then decides which
+-- rows it can see once it's through. Supabase used to auto-grant
+-- SELECT/INSERT/UPDATE/DELETE to anon/authenticated/service_role on every
+-- new public-schema table, but that default is going away — new projects
+-- created after May 30, 2026 don't get it, and it stops applying to *any*
+-- newly created table, on *any* project, from October 30, 2026 onward.
+-- These explicit grants make the schema correct regardless of when the
+-- project was created or when this file is run.
+--
+-- No table here grants anything to `anon` — every feature in this app
+-- requires a signed-in user, so unauthenticated access is intentionally
+-- not exposed at all.
+
+GRANT SELECT, INSERT, UPDATE ON students TO authenticated;
+GRANT SELECT ON courses TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON courses TO authenticated; -- narrowed to admins only by the RLS policies above
+GRANT SELECT ON units TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON units TO authenticated;   -- narrowed to admins only by the RLS policies above
+GRANT SELECT, INSERT, UPDATE ON enrollments TO authenticated;
+GRANT SELECT, INSERT ON feedback TO authenticated;
+
+GRANT ALL ON students, courses, units, enrollments, feedback TO service_role;
